@@ -1,0 +1,94 @@
+# ADNI Exploratory Data Analysis (EDA)
+# Group 7 (Brain Bugs)
+# Author: Paa Kwesi Danso
+# Date: Feb 2026
+#
+# Purpose:
+#   1) Analysis 1: CSF Aβ42 vs MMSE
+#   2) Analysis 2: APOE ε4 status vs MMSE trajectories (first 60 months)
+
+library(tidyverse)
+
+# Set working directory (same as your script)
+setwd("C:/Users/quacy/Downloads/ADNI_EDA_data")
+
+# Load Data (All 6 Tables)
+
+adas       <- read_csv("All_Subjects_ADAS_17Feb2026.csv", show_col_types = FALSE)
+apoe       <- read_csv("All_Subjects_APOERES_17Feb2026.csv", show_col_types = FALSE)
+cdr        <- read_csv("All_Subjects_CDR_17Feb2026.csv", show_col_types = FALSE)
+mmse       <- read_csv("All_Subjects_MMSE_17Feb2026.csv", show_col_types = FALSE)
+demog      <- read_csv("All_Subjects_PTDEMOG_17Feb2026.csv", show_col_types = FALSE)
+biomarkers <- read_csv("All_Subjects_UPENNBIOMK_ROCHE_ELECSYS_17Feb2026.csv", show_col_types = FALSE)
+
+# Helper: VISCODE2 -> months
+# bl -> 0, m06 -> 6, m12 -> 12
+
+viscode_to_months <- function(v) {
+  case_when(
+    v == "bl" ~ 0,
+    str_detect(v, "^m\\d+$") ~ as.numeric(str_remove(v, "m")),
+    TRUE ~ NA_real_
+  )
+}
+
+# Analysis 1: CSF Aβ42 vs MMSE (matched by RID + VISCODE2)
+
+analysis1 <- mmse %>%
+  select(RID, VISCODE2, MMSCORE) %>%
+  inner_join(
+    biomarkers %>% select(RID, VISCODE2, ABETA42),
+    by = c("RID", "VISCODE2")
+  ) %>%
+  drop_na(MMSCORE, ABETA42)
+
+cat("Analysis 1 rows (after merge + drop_na):", nrow(analysis1), "\n\n")
+
+plot_analysis1 <- ggplot(analysis1, aes(x = ABETA42, y = MMSCORE)) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(method = "lm", se = TRUE) +
+  labs(
+    title = "CSF Aβ42 vs MMSE",
+    x = "CSF Aβ42",
+    y = "MMSE Score"
+  ) +
+  theme_minimal()
+
+print(plot_analysis1)
+
+
+
+
+# Analysis 2: APOE ε4 status vs MMSE trajectories (0–60 months)
+
+# APOE genotype does not change across visits, so keep one row per RID
+apoe_status <- apoe %>%
+  select(RID, GENOTYPE) %>%
+  distinct() %>%
+  mutate(
+    apoe4_status = if_else(str_detect(GENOTYPE, "4"), "Carrier", "Non-carrier")
+  )
+
+analysis2 <- mmse %>%
+  select(RID, VISCODE2, MMSCORE) %>%
+  inner_join(apoe_status, by = "RID") %>%
+  mutate(months = viscode_to_months(VISCODE2)) %>%
+  drop_na(MMSCORE, months) %>%
+  filter(months <= 60)
+
+cat("Analysis 2 rows (after merge + drop_na, <=60 months):", nrow(analysis2), "\n\n")
+
+plot_analysis2 <- ggplot(analysis2, aes(x = months, y = MMSCORE, color = apoe4_status)) +
+  stat_summary(fun = mean, geom = "line", linewidth = 1.2) +
+  stat_summary(fun = mean, geom = "point", size = 2) +
+  labs(
+    title = "MMSE Trajectory by APOE ε4 Status (First 60 Months)",
+    x = "Months Since Baseline",
+    y = "MMSE Score",
+    color = "APOE ε4 Status"
+  ) +
+  theme_minimal()
+
+print(plot_analysis2)
+
+

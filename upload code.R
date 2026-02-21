@@ -15,15 +15,9 @@ install.packages("/Users/makayla/Captsone project/Group7/ADNIMERGE2.tar.gz", rep
 
 #Load the package
 
-library(ADNIMERGE)
+library(ADNIMERGE2)
 
 #View package documentation and vignettes
 
-help(package = "ADNIMERGE")
+help(package = "ADNIMERGE2")
 
-#Load main data frame - This function loads the consolidated ADNI data set into an analysis-ready R data frame.
-adnimerge_data <- adnimerge()
-
-#View documentation for a specific data table (e.g., adas)
-
-?adas

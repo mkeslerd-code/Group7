@@ -1,0 +1,13 @@
+##Table 1: Distribution of MMSE Cognitive Scores
+
+ggplot(ALL_Subjects_MMSE, aes(x = MMSCORE)) +
+  geom_histogram(
+    bins = 30,
+    fill = "steelblue",
+    color = "black"
+  ) +
+  labs(
+    title = "Distribution of MMSE Cognitive Scores",
+    x = "MMSE Score",
+    y = "Number of Observations"
+  )

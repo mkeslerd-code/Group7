@@ -82,7 +82,7 @@ ggplot(Totals2, aes(x=Gender, y= Total, fill=Gender))+
     "Male" = "maroon"
   ))+
   labs(
-    title = "Total Participant Counts by Gender",
+    title = "Total AD Participant Counts by Gender",
     x = "",
     y = "Total Number of Participants"
   )+

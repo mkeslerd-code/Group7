@@ -7,6 +7,7 @@ if (!requireNamespace("car", quietly = TRUE)) install.packages("car")
 library(tidyverse)
 library(broom)
 library(car)
+library(dplyr)
 
 # Locate Working Folder
 file.choose()
@@ -55,3 +56,31 @@ summary(model2)
 
 # Model 1 and Model 2 Comparison
 anova(model1, model2)
+
+# Extract model summaries
+model1_summary <- glance(model1)
+model2_summary <- glance(model2)
+
+# Create a clean comparison table
+results_table <- tibble(
+  Model = c("Model 1: Aβ42 Only", "Model 2: Aβ42 + Tau"),
+  R_Squared = c(model1_summary$r.squared,
+                model2_summary$r.squared),
+  Adjusted_R2 = c(model1_summary$adj.r.squared,
+                  model2_summary$adj.r.squared),
+  Residual_SE = c(model1_summary$sigma,
+                  model2_summary$sigma),
+  F_Statistic = c(model1_summary$statistic,
+                  model2_summary$statistic),
+  N = c(nobs(model1), nobs(model2))
+)
+
+results_table
+
+# Create a clean coefficient table
+coef_table <- bind_rows(
+  tidy(model1) %>% mutate(Model = "Model 1"),
+  tidy(model2) %>% mutate(Model = "Model 2")
+)
+
+coef_table

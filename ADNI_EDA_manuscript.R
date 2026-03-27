@@ -33,6 +33,7 @@
 # SECTION 0: Libraries + Data Loading
 # =============================================================================
 
+
 library(tidyverse)
 library(lme4)
 library(lmerTest)
@@ -40,16 +41,45 @@ library(gtsummary)
 library(gt)
 library(broom.mixed)   # required for tbl_regression() on lmer objects
 
+CommonPTID <- Reduce(intersect,list(All_Subjects_ADAS_17Feb2026$PTID,
+                                    All_Subjects_APOERES_17Feb2026$PTID,
+                                    All_Subjects_CDR_17Feb2026$PTID,
+                                    All_Subjects_MMSE_17Feb2026$PTID,
+                                    All_Subjects_PTDEMOG_17Feb2026$PTID,
+                                    All_Subjects_UPENNBIOMK_ROCHE_ELECSYS_17Feb2026$PTID
+))
+length(unique(CommonPTID))
+
+#filtered datasets
+
+adas <- All_Subjects_ADAS_17Feb2026[All_Subjects_ADAS_17Feb2026$PTID 
+                                            %in% CommonPTID,]
+
+apoe <- All_Subjects_APOERES_17Feb2026[All_Subjects_APOERES_17Feb2026$PTID 
+                                                  %in% CommonPTID,]
+
+cdr  <- All_Subjects_CDR_17Feb2026[All_Subjects_CDR_17Feb2026$PTID 
+                                          %in% CommonPTID,]
+
+mmse <- All_Subjects_MMSE_17Feb2026[All_Subjects_MMSE_17Feb2026$PTID 
+                                            %in% CommonPTID,]
+
+demog <- All_Subjects_PTDEMOG_17Feb2026[All_Subjects_PTDEMOG_17Feb2026$PTID 
+                                                  %in% CommonPTID,]
+
+biomarkers <- All_Subjects_UPENNBIOMK_ROCHE_ELECSYS_17Feb2026[All_Subjects_UPENNBIOMK_ROCHE_ELECSYS_17Feb2026$PTID 
+                                                                      %in% CommonPTID,]
+
 # Set working directory — update to your local path
-setwd("/Users/quacy/Downloads/ADNI_EDA_data")
+#setwd("/Users/quacy/Downloads/ADNI_EDA_data")
 
 # Load all 6 ADNI data tables
-adas       <- read_csv("All_Subjects_ADAS_17Feb2026.csv",                      show_col_types = FALSE)
-apoe       <- read_csv("All_Subjects_APOERES_17Feb2026.csv",                   show_col_types = FALSE)
-cdr        <- read_csv("All_Subjects_CDR_17Feb2026.csv",                       show_col_types = FALSE)
-mmse       <- read_csv("All_Subjects_MMSE_17Feb2026.csv",                      show_col_types = FALSE)
-demog      <- read_csv("All_Subjects_PTDEMOG_17Feb2026.csv",                   show_col_types = FALSE)
-biomarkers <- read_csv("All_Subjects_UPENNBIOMK_ROCHE_ELECSYS_17Feb2026.csv",  show_col_types = FALSE)
+#adas       <- read_csv("All_Subjects_ADAS_17Feb2026.csv",                      show_col_types = FALSE)
+#apoe       <- read_csv("All_Subjects_APOERES_17Feb2026.csv",                   show_col_types = FALSE)
+#cdr        <- read_csv("All_Subjects_CDR_17Feb2026.csv",                       show_col_types = FALSE)
+#mmse       <- read_csv("All_Subjects_MMSE_17Feb2026.csv",                      show_col_types = FALSE)
+#demog      <- read_csv("All_Subjects_PTDEMOG_17Feb2026.csv",                   show_col_types = FALSE)
+#biomarkers <- read_csv("All_Subjects_UPENNBIOMK_ROCHE_ELECSYS_17Feb2026.csv",  show_col_types = FALSE)
 
 # Recode MMSE sentinel value (-1 = missing/invalid)
 mmse <- mmse %>%
@@ -568,7 +598,7 @@ cat("  to unseen data without overfitting.\n")
 cat("\n=== SECTION 6: Publication Tables ===\n\n")
 
 # --- tbl_F1: Participant Characteristics by APOE ε4 Status ---
-cat("--- Table 1: Participant Characteristics ---\n")
+cat("--- Table 2: Participant Characteristics ---\n")
 
 char_table_data <- analysis1_demog %>%
   select(MMSCORE, ABETA42, TAU, AGE, SEX, EDUCATION, apoe4_status) %>%
@@ -594,12 +624,12 @@ tbl_F1 <- tbl_summary(
   add_p() %>%
   bold_p(t = 0.05) %>%
   bold_labels() %>%
-  modify_caption("**Table 1. Participant Characteristics by APOE e4 Status**")
+  modify_caption("**Table 2. Participant Characteristics by APOE e4 Status**")
 
 print(tbl_F1)
 
 # --- tbl_F2: Cross-Sectional OLS Model Comparison (Models 1–4) ---
-cat("\n--- Table 2: Cross-Sectional OLS Models 1–4 ---\n")
+cat("\n--- Table 3: Cross-Sectional OLS Models 1–4 ---\n")
 
 # All four models refitted on same demographic-filtered sample for comparability
 tbl_m1 <- tbl_regression(m1_demog,
@@ -626,16 +656,14 @@ tbl_m4 <- tbl_regression(model4_demog,
                EDUCATION    ~ "Education (years)")) %>%
   bold_p(t = 0.05)
 
-tbl_F2 <- tbl_merge(
-  tbls        = list(tbl_m1, tbl_m2, tbl_m3, tbl_m4),
-  tab_spanner = c("**Model 1**", "**Model 2**", "**Model 3**", "**Model 4**")
-) %>%
-  modify_caption("**Table 2. Cross-Sectional OLS Regression Models (Outcome: MMSE Score)**")
+tbl_F2 <- tbl_merge(tbls= list(tbl_m1, tbl_m2, tbl_m3, tbl_m4), 
+                    tab_spanner = c("**Model 1**", "**Model 2**", "**Model 3**", "**Model 4**")
+                    ) %>% modify_caption("**Table 3. Cross-Sectional OLS Regression Models (Outcome: MMSE Score)**")
 
 print(tbl_F2)
 
 # --- tbl_F3: Longitudinal LMM — Full Model (Random Slopes + Demographics) ---
-cat("\n--- Table 3: Longitudinal LMM Full Model ---\n")
+cat("\n--- Table 4: Longitudinal LMM Full Model ---\n")
 
 tbl_F3 <- tbl_regression(
   mixed_model_full,
@@ -650,7 +678,7 @@ tbl_F3 <- tbl_regression(
 ) %>%
   bold_p(t = 0.05) %>%
   bold_labels() %>%
-  modify_caption("**Table 3. Linear Mixed-Effects Model — Random Slopes + Demographics (Outcome: MMSE Score)**")
+  modify_caption("**Table 4. Linear Mixed-Effects Model — Random Slopes + Demographics (Outcome: MMSE Score)**")
 
 print(tbl_F3)
 

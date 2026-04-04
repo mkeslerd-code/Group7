@@ -106,14 +106,24 @@ head(demog$PTRACCAT_label)
 table(demog$PTRACCAT_label)
 
 demographics_summary <- demog %>%
-  count(PTRACCAT_label)%>%
-  mutate(percent = round(n/sum(n)* 100, 2))
+  count(PTRACCAT_label) %>%
+  complete(PTRACCAT_label = race_levels, fill = list(n = 0)) %>%
+  mutate(
+    percent = round(n / sum(n) * 100, 2),
+    `n (%)` = paste0(n, " (", percent, "%)")
+  ) %>%
+  select(Race = PTRACCAT_label, `n (%)`)
 
 
-ggplot(demographics_summary, aes(x = reorder(PTRACCAT_label, -n), y = n)) +
+ggplot(demographics_summary, aes(x = reorder(PTRACCAT_label, -percent), y = percent)) +
   geom_bar(stat = "identity") +
+  geom_text(aes(label = paste0(percent, "%")), vjust = -0.5) +
+  labs(
+    title = "Race/Ethnicity Distribution",
+    x = "Race/Ethnicity",
+    y = "Percent (%)"
+  ) +
   theme_minimal() +
-  labs(x = "Race/Ethnicity", y = "Count") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 

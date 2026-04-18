@@ -39,6 +39,7 @@ library(lme4)
 library(lmerTest)
 library(gtsummary)
 library(gt)
+
 library(broom.mixed)   # required for tbl_regression() on lmer objects
 
 CommonPTID <- Reduce(intersect,list(All_Subjects_ADAS_17Feb2026$PTID,
@@ -162,8 +163,17 @@ plot_analysis1 <- ggplot(analysis1, aes(x = ABETA42, y = MMSCORE)) +
   theme_minimal()
 
 print(plot_analysis1)
-ggsave("./outputs/Fig1_ABeta42_vs_MMSE.png",
-       plot = plot_analysis1, width = 8, height = 6, dpi = 300)
+
+dir.create("/Users/makayla/Desktop/Capstone presentation", showWarnings = FALSE)
+
+ggsave(
+  filename = "Fig1_CSF_AB42_vs_MMSE.png",
+  plot = plot_analysis1,
+  path = "/Users/makayla/Desktop/Capstone presentation",
+  width = 8,
+  height = 6,
+  dpi = 300
+)
 
 # --- 1d. OLS Models 1 & 2 ---
 model1_abeta     <- lm(MMSCORE ~ ABETA42,       data = analysis1)
@@ -223,9 +233,17 @@ plot_apoe_scatter <- ggplot(
   theme_minimal()
 
 print(plot_apoe_scatter)
-ggsave("./outputs/Fig2_ABeta42_vs_MMSE_by_APOE.png",
-       plot = plot_apoe_scatter, width = 8, height = 6, dpi = 300)
 
+dir.create("/Users/makayla/Desktop/Capstone presentation", showWarnings = FALSE)
+
+ggsave(
+  filename = "Fig2_ABeta42_vs_MMSE_by_APOE.png",
+  plot = plot_apoe_scatter,
+  path = "/Users/makayla/Desktop/Capstone presentation",
+  width = 8,
+  height = 6,
+  dpi = 300
+)
 # --- 1i. Add demographic covariates ---
 # Note: ADNI MMSE table stores visit date as USERDATE (not EXAMDATE)
 analysis1_demog <- analysis1_apoe %>%
@@ -332,9 +350,17 @@ plot_analysis2_mean <- ggplot(
   theme_minimal()
 
 print(plot_analysis2_mean)
-ggsave("./outputs/Fig3_Mean_MMSE_Trajectory_by_APOE.png",
-       plot = plot_analysis2_mean, width = 8, height = 6, dpi = 300)
 
+dir.create("/Users/makayla/Desktop/Capstone presentation", showWarnings = FALSE)
+
+ggsave(
+  filename = "Fig3_Mean_MMSE_Trajectory_by_APOE.png",
+  plot = plot_analysis2_mean,
+  path = "/Users/makayla/Desktop/Capstone presentation",
+  width = 8,
+  height = 6,
+  dpi = 300
+)
 # --- Figure 4: Spaghetti plot — individual trajectories by APOE ε4 ---
 set.seed(7)
 sample_rids      <- sample(unique(analysis2$RID), size = min(150, n_distinct(analysis2$RID)))
@@ -354,9 +380,17 @@ plot_analysis2_spaghetti <- ggplot(
   theme_minimal()
 
 print(plot_analysis2_spaghetti)
-ggsave("./outputs/Fig4_Individual_MMSE_Trajectories.png",
-       plot = plot_analysis2_spaghetti, width = 9, height = 6, dpi = 300)
 
+dir.create("/Users/makayla/Desktop/Capstone presentation", showWarnings = FALSE)
+
+ggsave(
+  filename = "Fig4_Individual_MMSE_Trajectories.png",
+  plot = plot_analysis2_spaghetti,
+  path = "/Users/makayla/Desktop/Capstone presentation",
+  width = 8,
+  height = 6,
+  dpi = 300
+)
 # --- Figure 5: MMSE distribution by APOE ε4 (boxplot) ---
 plot_analysis2_box <- ggplot(
   analysis2,
@@ -372,9 +406,17 @@ plot_analysis2_box <- ggplot(
   theme(legend.position = "none")
 
 print(plot_analysis2_box)
-ggsave("./outputs/Fig5_MMSE_Boxplot_by_APOE.png",
-       plot = plot_analysis2_box, width = 7, height = 6, dpi = 300)
 
+dir.create("/Users/makayla/Desktop/Capstone presentation", showWarnings = FALSE)
+
+ggsave(
+  filename = "Fig5_MMSE_Boxplot_by_APOE.png",
+  plot = plot_analysis2_box,
+  path = "/Users/makayla/Desktop/Capstone presentation",
+  width = 8,
+  height = 6,
+  dpi = 300
+)
 
 # =============================================================================
 # SECTION 3: Linear Mixed-Effects Models
@@ -454,9 +496,17 @@ plot_random_slopes <- ggplot(
   theme_minimal()
 
 print(plot_random_slopes)
-ggsave("./outputs/Fig6_Predicted_Trajectories_Random_Slopes.png",
-       plot = plot_random_slopes, width = 9, height = 6, dpi = 300)
 
+dir.create("/Users/makayla/Desktop/Capstone presentation", showWarnings = FALSE)
+
+ggsave(
+  filename = "Fig6_Predicted_Trajectories_Random_Slopes.png",
+  plot = plot_random_slopes,
+  path = "/Users/makayla/Desktop/Capstone presentation",
+  width = 8,
+  height = 6,
+  dpi = 300
+)
 # --- Model C: Random slopes + demographic covariates (full model) ---
 # Build longitudinal dataset with age, sex, education joined in
 analysis2_demog <- analysis2 %>%
@@ -547,8 +597,17 @@ plot_ceiling <- ggplot(ceiling_compare, aes(x = score, fill = Scale)) +
   theme(legend.position = "none")
 
 print(plot_ceiling)
-ggsave("./outputs/Fig7_MMSE_vs_ADAS_Distribution.png",
-       plot = plot_ceiling, width = 9, height = 5, dpi = 300)
+
+dir.create("/Users/makayla/Desktop/Capstone presentation", showWarnings = FALSE)
+
+ggsave(
+  filename = "Fig7_MMSE_vs_ADAS_Distribution.png",
+  plot = plot_ceiling,
+  path = "/Users/makayla/Desktop/Capstone presentation",
+  width = 8,
+  height = 6,
+  dpi = 300
+)
 
 
 # =============================================================================
@@ -716,3 +775,28 @@ tbl_F3 %>%
 cat("--- Table 3 saved as PNG ---\n")
 
 cat("\n=== Script complete. All manuscript figures and tables generated. ===\n")
+# Export Table 1
+tbl_F1 %>%
+  as_gt() %>%
+  gt::gtsave(
+    filename = "/Users/makayla/Desktop/Capstone presentation/Table1_characteristics.png",
+    vwidth = 1400,
+    vheight = 900
+  )
+
+# Export Table 2
+tbl_F2 %>%
+  as_gt() %>%
+  gt::gtsave(
+    filename = "/Users/makayla/Desktop/Capstone presentation/Table2_crosssectional_models.png",
+    vwidth = 1600,
+    vheight = 1000
+  )
+# Export Table 3
+tbl_F3 %>%
+  as_gt() %>%
+  gt::gtsave(
+    filename = "/Users/makayla/Desktop/Capstone presentation/Table3_longitudinal_LMM.png",
+    vwidth = 1400,
+    vheight = 900
+  )
